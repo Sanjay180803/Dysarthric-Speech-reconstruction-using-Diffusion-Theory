@@ -1,0 +1,27 @@
+# data and generated artifacts (TORGO is not redistributable)
+data/
+runs/
+pretrained_models/
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.wav
+*.flac
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.venv/
+venv/
+speech/
+.pytest_cache/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

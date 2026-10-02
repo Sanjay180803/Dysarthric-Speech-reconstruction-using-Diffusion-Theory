@@ -1,0 +1,18 @@
+{
+  "_note": "Measured in notebooks/02_articulation_diffusion.ipynb on 100 clean (F_Con) vs 100 moderate utterances. Regenerate with scripts/compute_stats.py.",
+  "num_clean_files_used": 100,
+  "num_moderate_files_used": 100,
+  "clean_local_energy_mean": 20.050154579877855,
+  "moderate_local_energy_mean": 20.260493206977845,
+  "smoothness_ratio": 1.010490623209767,
+  "clean_adjacent_cos_mean": 0.9332037127017975,
+  "moderate_adjacent_cos_mean": 0.9327216243743897,
+  "boundary_blur_gain": -0.0004820883274078147,
+  "clean_residual_l2_mean": 1.598952054977417,
+  "moderate_residual_l2_mean": 1.5734976530075073,
+  "drift_l2_mean": 1.5734976530075073,
+  "drift_l2_std": 1.719301462173462,
+  "drift_l2_p95": 5.36539888381958,
+  "clean_frame_norm_mean": 11.770925521850586,
+  "moderate_frame_norm_mean": 11.969115257263184
+}

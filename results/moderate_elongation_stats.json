@@ -1,0 +1,99 @@
+{
+  "_note": "Measured on TORGO head-mic wav2vec2-lv-60-espeak embeddings in notebooks/01_elongation_statistics.ipynb (joint 100-cluster k-means). Regenerate with scripts/compute_stats.py.",
+  "moderate": {
+    "per_session": {
+      "wav_headMic_F03S01": {
+        "num_files": 204,
+        "total_frames": 33776,
+        "mean_run": 2.7177341486964917,
+        "p95_run": 7.0,
+        "geom_p": 0.36795357650402655,
+        "p_switch": 0.4084751220222463
+      },
+      "wav_headMic_F03S02": {
+        "num_files": 159,
+        "total_frames": 26155,
+        "mean_run": 2.6897367338543807,
+        "p95_run": 8.0,
+        "geom_p": 0.3717835977824508,
+        "p_switch": 0.3425295662478438
+      }
+    },
+    "pooled": {
+      "num_files": 1065,
+      "total_frames": 204174,
+      "mean_run": 2.7555333621248113,
+      "p95_run": 8.0,
+      "geom_p": 0.3629061486771087,
+      "p_switch": 0.3535680421790696
+    }
+  },
+  "per_group": {
+    "F_Con": {
+      "run_length": {
+        "mean": 2.4985583732380117,
+        "p95": 7.0,
+        "geom_p": 0.4002307933690771
+      },
+      "switch": {
+        "p_switch": 0.3669432029978094
+      },
+      "instability_distance": {
+        "mean": 4.488930702209473,
+        "var": 4.3262434005737305,
+        "gamma_k": 4.65773581915584,
+        "gamma_theta": 0.9637581169262277
+      },
+      "deletion_proxy": {
+        "p_del": 0.10000033741720625,
+        "norm_threshold": 11.063979148864746
+      },
+      "total_frames": 296369,
+      "num_files": 2158
+    },
+    "M_Con": {
+      "run_length": {
+        "mean": 2.581837122757253,
+        "p95": 7.0,
+        "geom_p": 0.38732110216621946
+      },
+      "switch": {
+        "p_switch": 0.36490454024318125
+      },
+      "instability_distance": {
+        "mean": 4.703963756561279,
+        "var": 4.3731279373168945,
+        "gamma_k": 5.059827963006762,
+        "gamma_theta": 0.9296687142236328
+      },
+      "deletion_proxy": {
+        "p_del": 0.10000048613541788,
+        "norm_threshold": 10.933394432067871
+      },
+      "total_frames": 411408,
+      "num_files": 3050
+    },
+    "moderate": {
+      "run_length": {
+        "mean": 2.752561475409836,
+        "p95": 8.0,
+        "geom_p": 0.3632979713381724
+      },
+      "switch": {
+        "p_switch": 0.35380234322544135
+      },
+      "instability_distance": {
+        "mean": 5.939018726348877,
+        "var": 5.059114456176758,
+        "gamma_k": 6.971959962055914,
+        "gamma_theta": 0.8518434928874089
+      },
+      "deletion_proxy": {
+        "p_del": 0.10000293866995798,
+        "norm_threshold": 11.017827987670898
+      },
+      "total_frames": 204174,
+      "num_files": 1065
+    }
+  }
+}

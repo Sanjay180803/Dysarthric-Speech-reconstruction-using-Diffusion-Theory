@@ -1,0 +1,171 @@
+# Default configuration. Paths are relative to the repo root.
+seed: 42
+device: auto            # auto | cpu | cuda
+
+paths:
+  torgo_root: data/TORGO              # raw TORGO audio (not distributed here)
+  embeddings_root: data/embeddings    # <group>/wav_headMic_<SPK>S<NN>/<utt>_frame.npy
+  manifest: data/manifest.csv
+  work_dir: runs                      # caches, checkpoints, outputs
+
+features:
+  model_name: facebook/wav2vec2-lv-60-espeak-cv-ft   # 1024-d, 20 ms frames
+  mic: headMic
+
+# TORGO speakers -> group used throughout (report Table 1)
+speaker_groups:
+  F_Con: [FC01, FC02, FC03]
+  M_Con: [MC01, MC02, MC03, MC04]
+  mild: [F04, M03]
+  moderate: [F03, M05]
+  severe: [F01, M01, M02, M04]
+
+clean_groups: [F_Con, M_Con]
+dysarthric_group: moderate
+
+diffusion:
+  T: 30
+  schedule: cosine
+
+# --------------------------------------------------------------------------
+# Statistics (scripts/compute_stats.py). Values below are the measured TORGO
+# moderate numbers from results/moderate_elongation_stats.json and are used
+# as fallbacks when the stats files are absent.
+# --------------------------------------------------------------------------
+stats:
+  elongation_file: results/moderate_elongation_stats.json
+  articulation_file: results/articulation_stats.json
+  kmeans_clusters: 100
+
+hold_warp:
+  geom_p: 0.3448
+  p95: 9
+  steps: 30
+  schedule: cosine
+
+# --------------------------------------------------------------------------
+# Hand-designed forward modules (exploratory stage)
+# --------------------------------------------------------------------------
+factors:
+  articulation_budgeted:
+    total_scale: 1.5
+    noise_smooth_kernel: 5
+    schedule: cosine_full
+  articulation:
+    total_scale: 1.30
+    noise_smooth_kernel: 9
+    embed_smooth_kernel: 7
+    max_blur_alpha: 0.85
+    max_mix_prob: 0.65
+    max_mix_lam: 0.70
+    span_density_base: 0.04
+    span_density_scale: 0.16
+    span_len_min: 3
+    span_len_max: 9
+    hard_replace_prob: 0.22
+    transition_power: 1.75
+    weakening_strength: 0.18
+  phonation:
+    total_scale: 0.85
+    noise_smooth_kernel: 11
+    gain_smooth_kernel: 21
+    stable_span_density_base: 0.03
+    stable_span_density_scale: 0.10
+    span_len_min: 4
+    span_len_max: 12
+    stability_power: 1.5
+    max_gain_flutter: 0.16
+    max_jitter_scale: 0.22
+    max_breathy_weakening: 0.22
+    max_coherence_loss: 0.30
+  pause_rhythm:
+    pause_density_base: 0.015
+    pause_density_scale: 0.06
+    pause_len_min: 3
+    pause_len_max: 10
+    rhythm_density_base: 0.020
+    rhythm_density_scale: 0.08
+    rhythm_len_min: 4
+    rhythm_len_max: 14
+    boundary_power: 1.4
+    pause_flatten_strength: 0.65
+    pause_weaken_strength: 0.22
+    pause_smooth_kernel: 9
+    rhythm_reindex_strength: 0.35
+    rhythm_local_mix_strength: 0.30
+    rhythm_shift_choices: [-3, -2, -1, 1, 2, 3]
+    global_timing_jitter: 0.08
+
+factor_training:
+  batch_size: 4
+  epochs: 20
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  val_fraction: 0.1
+
+# --------------------------------------------------------------------------
+# Combined pipeline (report Section 3.5)
+# --------------------------------------------------------------------------
+stats_encoder:
+  batch_size: 8
+  epochs: 30
+  lr: 3.0e-4
+  max_len: 600
+  freeze_target_head: true
+
+neural_forward:
+  model: {dim_in: 1024, hidden: 384, time_dim: 128, cond_dim: 128, dilations: [1, 2, 4, 1, 2, 4], kernel_size: 5}
+  batch_size: 8
+  epochs: 30
+  lr: 2.0e-4
+  items_per_chain: 8
+  max_utterances: null        # cap cached chains (each is ~(T+1) x L x 1024 float16)
+
+chain:
+  alpha_scale: 0.5            # alpha_t = alpha_scale * sw_t
+  elongation: {enabled: true, n_regions: [2, 3], max_extra: 10, region_len: [3, 8]}
+  drift: {drift_scale: 0.06, noise_kernel: 11, blur_kernel: 5, blur_weight: 0.05, mix_prob: 0.04, mix_weight: 0.05}
+
+reverse:
+  model: {dim_in: 1024, hidden: 384, time_dim: 128, cond_dim: 128, dilations: [1, 2, 4, 1, 2, 4], kernel_size: 5}
+  n_steps: 5                  # inference at t = 30, 24, 18, 12, 6
+  stride: 6                   # train on (x_t, x_{t-6}) so one reverse step undoes 6 forward steps
+  loss_weights: {delta: 1.0, prev: 0.5, smooth: 0.3}
+  batch_size: 8
+  epochs: 40
+  lr: 2.0e-4
+  items_per_chain: 8
+
+advance:
+  batch_size: 8
+  epochs: 20
+  lr: 3.0e-4
+  max_len: 600
+
+embedding_to_mel:
+  batch_size: 16
+  epochs: 50
+  lr: 5.0e-4
+  window_frames: 100          # 2 s crops of aligned embedding/mel
+
+enhance:
+  n_steps: 5
+  clip_ratio: 0.20
+  smooth_kernel: 3
+  compress_elongation: false  # the reported numbers were computed without compression
+  compress_mode: threshold    # threshold | topk
+  compress_target_ratio: 0.91 # topk: clean/moderate mean-run ratio (2.50 / 2.75)
+  compress_min_ratio: 0.6     # threshold mode never drops below this fraction of frames
+  metricgan: true
+
+evaluate:
+  asr_model: facebook/wav2vec2-base-960h
+  reference: input            # input (as in the report) | clean_prompt_match
+
+checkpoints:
+  stats_encoder: runs/stats_encoder/best.pt
+  neural_forward: runs/neural_forward/best.pt
+  reverse: runs/reverse/best.pt
+  advance: runs/advance/best.pt
+  embedding_to_mel: runs/embedding_to_mel/best.pt
