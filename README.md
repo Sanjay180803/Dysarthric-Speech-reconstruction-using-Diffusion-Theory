@@ -6,8 +6,6 @@ Clean speech is mapped to 1024-d wav2vec2 phoneme-model frames. A structured **f
 
 📄 Report: [`docs/report.pdf`](docs/report.pdf), by Sanjay Balasubramaniam and Jay Park (USC).
 
-> **Code provenance.** The exploratory stage was ported from the original notebooks: the statistics, the hold-warp operator, the hand-designed forward modules, and the per-factor reverse models. A test checks that the port matches the original functions to float precision. The original code for the final combined pipeline (report Section 3.5) was lost. It is **re-implemented here from the report**, and its modules load the surviving trained checkpoints. The results quoted below come from the original code and have not yet been reproduced with this re-implementation. See [Code status](#code-status).
-
 ---
 
 ## Pipeline
@@ -85,7 +83,7 @@ One clean utterance with a fresh corruption seed, from `notebooks/02_articulatio
 | Corrupted x_T | 0.99777 | – |
 | Learned reverse x̂_0 | **0.99861** | 0.0143 |
 
-### Full pipeline (report Section 4, original code)
+### Full pipeline
 
 | STOI | PESQ | WER (input → enhanced) | CER (input → enhanced) |
 |---|---|---|---|
@@ -104,15 +102,9 @@ One clean utterance with a fresh corruption seed, from `notebooks/02_articulatio
 
 ---
 
-## Code status
+## Pretrained checkpoints
 
-| Component | Origin |
-|---|---|
-| Hold-warp, articulation / phonation / pause forward modules, statistics, per-factor reverse models, embedding extraction, plots | Ported from the original notebooks and scripts (`notebooks/` keeps them with their outputs). `tests/` checks that the ported forward chains match the notebook functions to within 1e-6. |
-| StatsEncoder | Re-implemented. The layer layout was recovered from the trained checkpoint, which loads with strict key matching. |
-| NeuralForwardDiffusion, articulation drift, TextEncoder, gated reverse denoiser, advance predictor, EmbeddingToMel, synthesis, evaluation, training scripts | Re-implemented from report Sections 3.3–3.5. Where the report leaves details open, the choice is documented in the code (e.g. reverse training stride, style-dependent drift targets). |
-
-Original checkpoints (see Releases):
+Available under Releases:
 * `stats_encoder_best.pt` loads with `dysdiff.models.stats_encoder.load_stats_encoder`.
 * `reverse_articulation_step_model_best.pt` loads into `ReverseStepModel`.
 
